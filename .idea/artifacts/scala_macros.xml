@@ -1,8 +1,0 @@
-<component name="ArtifactManager">
-  <artifact type="jar" build-on-make="true" name="scala-macros">
-    <output-path>$PROJECT_DIR$/../play-scala/lib</output-path>
-    <root id="archive" name="scala-macros.jar">
-      <element id="module-output" name="scala-macros" />
-    </root>
-  </artifact>
-</component>
