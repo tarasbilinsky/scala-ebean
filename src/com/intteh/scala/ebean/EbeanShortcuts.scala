@@ -39,7 +39,7 @@ object EbeanShortcuts {
 
     private val allFieldsMarker = "$"
     private val modelPropRE = s"\\Q$modelName.\\E([a-zA-Z0-9_\\.]*)".r
-    private val modelPropWithImplicitRE = s"\\Qmacros.ebean.EbeanImplicits.\\E[a-zA-Z0-9_]*\\Q($modelName.\\E([a-zA-Z0-9_\\.]*)\\Q)\\E".r
+    private val modelPropWithImplicitRE = s"\\Qcom.intteh.scala.ebean.EbeanImplicits.\\E[a-zA-Z0-9_]*\\Q($modelName.\\E([a-zA-Z0-9_\\.]*)\\Q)\\E".r
 
     private val modelNameWDot = modelName + "."
     private val lengthOfModelNameWDot = modelNameWDot.length
