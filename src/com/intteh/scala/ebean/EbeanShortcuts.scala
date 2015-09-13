@@ -45,7 +45,7 @@ object EbeanShortcuts {
     private val lengthOfModelNameWDot = modelNameWDot.length
     private val e = q"com.avaje.ebean.Expr"
 
-    protected object N extends Enumeration {
+    protected object NodeType extends Enumeration {
       type N = Value
       val SubTree, Property, Val, ValMany = Value
     }
@@ -60,33 +60,33 @@ object EbeanShortcuts {
         val r = s.substring(lengthOfModelNameWDot)
         if(r.startsWith("`") && r.endsWith("`")) r.substring(1,r.length-1) else r
       }
-      else exception(s"Select list must start with model name but is $s instead")
+      else exception(s"Select list must start with model name but got $s instead")
     }
 
-    def makeQry(t: Tree, n: N.N = N.SubTree): Tree = {
+    def makeQry(t: Tree, n: NodeType.N = NodeType.SubTree): Tree = {
       n match {
-        case N.SubTree => {
+        case NodeType.SubTree => {
           val s = t.symbol
           s match {
             case sm if sm.isMethod => {
-              case class M(em: Tree, p1: N.N, p2: N.N, fnParamPos:Boolean = false)
+              case class M(em: Tree, p1: NodeType.N, p2: NodeType.N, fnParamPos:Boolean = false)
               val m = sm.asMethod
 
               val em = m.name.toString match {
-                case "$greater" => new M(q"$e.gt", N.Property, N.Val)
-                case "$eq$eq" => new M(q"$e.eq", N.Property, N.Val)
-                case "$bang$eq" => new M(q"$e.ne", N.Property, N.Val)
-                case "$less" => new M(q"$e.lt", N.Property, N.Val)
-                case "$less$eq" => new M(q"$e.le", N.Property, N.Val)
-                case "$greater$eq" => new M(q"$e.ge", N.Property, N.Val)
-                case "$bar$bar" => new M(q"$e.or", N.SubTree, N.SubTree)
-                case "$amp$amp" => new M(q"$e.and", N.SubTree, N.SubTree)
-                case "unary_$bang" => new M(q"$e.not", N.SubTree, null)
-                case "in" =>   new M(q"$e.in",   N.Property, N.ValMany, true)
-                case "like" => new M(q"$e.like", N.Property, N.Val,true)
-                case "raw" =>  new M(q"$e.raw",  N.Val, null,true)
-                case "wrap" => new M(null,N.Val,null,true)
-                case "Boolean2boolean" =>  new  M(null,N.SubTree,null,true)
+                case "$greater" => new M(q"$e.gt", NodeType.Property, NodeType.Val)
+                case "$eq$eq" => new M(q"$e.eq", NodeType.Property, NodeType.Val)
+                case "$bang$eq" => new M(q"$e.ne", NodeType.Property, NodeType.Val)
+                case "$less" => new M(q"$e.lt", NodeType.Property, NodeType.Val)
+                case "$less$eq" => new M(q"$e.le", NodeType.Property, NodeType.Val)
+                case "$greater$eq" => new M(q"$e.ge", NodeType.Property, NodeType.Val)
+                case "$bar$bar" => new M(q"$e.or", NodeType.SubTree, NodeType.SubTree)
+                case "$amp$amp" => new M(q"$e.and", NodeType.SubTree, NodeType.SubTree)
+                case "unary_$bang" => new M(q"$e.not", NodeType.SubTree, null)
+                case "in" =>   new M(q"$e.in",   NodeType.Property, NodeType.ValMany, true)
+                case "like" => new M(q"$e.like", NodeType.Property, NodeType.Val,true)
+                case "raw" =>  new M(q"$e.raw",  NodeType.Val, null,true)
+                case "wrap" => new M(null,NodeType.Val,null,true)
+                case "Boolean2boolean" =>  new  M(null,NodeType.SubTree,null,true)
                 case emt@_ => exception(s"$emt method not handled")
               }
 
@@ -96,11 +96,11 @@ object EbeanShortcuts {
               Option(em.p2) match {
                 case Some(p2m) => {
                   val p1 = makeQry(if (opParamPosition) c.head.children.head else c.tail.head, em.p1)
-                  if(p2m!=N.ValMany) {
+                  if(p2m!=NodeType.ValMany) {
                     val p2 = makeQry(if (opParamPosition) c.tail.head else c.tail.tail.head, p2m)
                     q"${em.em}($p1,$p2)"
                   } else {
-                    val coll = c.tail.tail.map(e=>makeQry(e,N.Val)).map(e=>Apply(Select(Ident(TermName("l")), TermName("add")),List(e)))
+                    val coll = c.tail.tail.map(e=>makeQry(e,NodeType.Val)).map(e=>Apply(Select(Ident(TermName("l")), TermName("add")),List(e)))
                     val adds = Block(coll,Ident(TermName("l")))
 
                     q"${em.em}($p1, {val l = new java.util.ArrayList[Object];$adds})"
@@ -126,14 +126,14 @@ object EbeanShortcuts {
             }
           }
         }
-        case N.Property => {
+        case NodeType.Property => {
           t.toString match {
             case modelPropRE(p) => q"$p"
             case modelPropWithImplicitRE(p) => q"$p"
             case r@_ => exception(s"Invalid property $r, expected $modelName.somepropname.")
           }
         }
-        case N.Val => t
+        case NodeType.Val => t
       }
     }
 
