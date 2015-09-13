@@ -11,8 +11,7 @@ object EbeanShortcutsNonMacro {
     def this() = this(Ebean.getServer(null),null)
   }
 
-  def transaction[A](b:EbeanTransactionControl=>A):A = {
-    val server: EbeanServer = Ebean.getServer(null)
+  def transaction[A](b:EbeanTransactionControl=>A)(server: EbeanServer = Ebean.getServer(null)):A = {
     val tr: Transaction = server.createTransaction()
     val dbTrC = new EbeanTransactionControl(server,tr)
     try {
