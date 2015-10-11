@@ -35,7 +35,7 @@ val expr: com.avaje.ebean.Expression = expr(m, m.id>0)
 val itemsRaw: Seq[Item] = query(m,m.qty>0 && wrap(expr)
 
 
-
+//Transaction control
 transaction { implicit db =>
     val newRecord = new Item
     ...
