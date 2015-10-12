@@ -21,9 +21,16 @@ public class Item extends Model {
     //Dummy placeholder model for query and expr
     val m = new Item()
     //Instead of
-    com.avaje.ebean.Ebean.createQuery(classOf[Item]).select("title").where().gt("qty",0).like("title","%orange%").findList
-    // Use query macro that type checks property names and auto complete works when you write the code
-    val itemsOrange: Seq[Item] = query(m,m.qty>0 && like(m.title,"%orange%"),m.title).seq
+    com.avaje.ebean.Ebean.createQuery(classOf[Item])
+        .select("title")
+            .where()
+                .gt("qty",0)
+                .like("title","%orange%")
+    .findList
+    // Use query macro that type checks property names
+    // auto complete works when you write the code
+    val itemsOrange: Seq[Item] = 
+    query(m,m.qty>0 && like(m.title,"%orange%"),m.title).seq
 
     val item5: Option[Item] = query(m,m.id==5).one
 
