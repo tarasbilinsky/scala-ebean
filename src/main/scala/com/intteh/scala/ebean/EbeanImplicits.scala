@@ -6,6 +6,8 @@ import com.avaje.ebean._
 import scala.collection.JavaConverters._
 import EbeanShortcutsNonMacro.EbeanTransactionControl
 
+import scala.language.implicitConversions
+
 object EbeanImplicits {
   implicit def queryImplicit[T](query: Query[T]):EbeanImplicitQuery[T] = new EbeanImplicitQuery(query)
   implicit def querySqlImplicit(query: SqlQuery):EbeanImplicitSqlQuery = new EbeanImplicitSqlQuery(query)
