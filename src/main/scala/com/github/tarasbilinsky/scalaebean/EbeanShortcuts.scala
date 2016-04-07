@@ -1,4 +1,4 @@
-package com.intteh.scala.ebean
+package com.github.tarasbilinsky.scalaebean
 
 import scala.reflect.macros._
 import scala.language.experimental.macros
