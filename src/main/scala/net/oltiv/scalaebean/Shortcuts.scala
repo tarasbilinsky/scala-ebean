@@ -70,7 +70,7 @@ object Shortcuts {
           val s = t.symbol
           s match {
             case sm if sm.isMethod =>
-              case class M(em: Tree, p1: NodeType.N, p2: NodeType.N, fnParamPos:Boolean = false)
+              case class M(em: Tree, p1: NodeType.N, p2: NodeType.N, fnParamPos: Boolean = false)
               val m = sm.asMethod
 
               val em = m.name.toString match {
@@ -83,11 +83,11 @@ object Shortcuts {
                 case "$bar$bar" => new M(q"$e.or", NodeType.SubTree, NodeType.SubTree)
                 case "$amp$amp" => new M(q"$e.and", NodeType.SubTree, NodeType.SubTree)
                 case "unary_$bang" => new M(q"$e.not", NodeType.SubTree, null)
-                case "in" =>   new M(q"$e.in",   NodeType.Property, NodeType.ValMany, true)
-                case "like" => new M(q"$e.like", NodeType.Property, NodeType.Val,true)
-                case "raw" =>  new M(q"$e.raw",  NodeType.Val, null,true)
-                case "wrap" => new M(null,NodeType.Val,null,true)
-                case "Boolean2boolean" =>  new  M(null,NodeType.SubTree,null,true)
+                case "in" => new M(q"$e.in", NodeType.Property, NodeType.ValMany, true)
+                case "like" => new M(q"$e.like", NodeType.Property, NodeType.Val, true)
+                case "raw" => new M(q"$e.raw", NodeType.Val, null, true)
+                case "wrap" => new M(null, NodeType.Val, null, true)
+                case "Boolean2boolean" => new M(null, NodeType.SubTree, null, true)
                 case emt@_ => exception(s"$emt method not handled")
               }
 
@@ -97,18 +97,18 @@ object Shortcuts {
               Option(em.p2) match {
                 case Some(p2m) =>
                   val p1 = makeQry(if (opParamPosition) c.head.children.head else c.tail.head, em.p1)
-                  if(p2m!=NodeType.ValMany) {
+                  if (p2m != NodeType.ValMany) {
                     val p2 = makeQry(if (opParamPosition) c.tail.head else c.tail.tail.head, p2m)
                     q"${em.em}($p1,$p2)"
                   } else {
-                    val coll = c.tail.tail.map(e=>makeQry(e,NodeType.Val)).map(e=>Apply(Select(Ident(TermName("l")), TermName("add")),List(e)))
-                    val adds = Block(coll,Ident(TermName("l")))
+                    val coll = c.tail.tail.map(e => makeQry(e, NodeType.Val)).map(e => Apply(Select(Ident(TermName("l")), TermName("add")), List(e)))
+                    val adds = Block(coll, Ident(TermName("l")))
 
                     q"${em.em}($p1, {val l = new java.util.ArrayList[Object];$adds})"
                   }
 
                 case None =>
-                  val p1 = makeQry(if(opParamPosition) c.head else c.tail.head, em.p1)
+                  val p1 = makeQry(if (opParamPosition) c.head else c.tail.head, em.p1)
                   Option(em.em) match {
                     case Some(emm) => q"${em.em}($p1)"
                     case None => p1
@@ -116,13 +116,13 @@ object Shortcuts {
 
               }
 
-            }
             case _ =>
               // try parse as boolean property
               t.toString match {
                 case modelPropRE(p) => q"$e.eq($p,true)"
                 case r@_ => exception(s"Unexpected, not method in ${t.toString}; Tried parse as property: Invalid property $r, expected $modelName.somepropname.")
               }
+          }
 
         case NodeType.Property =>
           t.toString match {
