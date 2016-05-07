@@ -1,12 +1,12 @@
 lazy val ebean = (project in file(".")).
   settings(
-    organization := "com.github.tarasbilinsky",
+    organization := "net.oltiv",
     name := "scala-ebean-macros",
-    version := "0.0.1",
+    version := "0.1.1",
     scalaVersion := "2.11.8",
     scalacOptions += "-feature",
     libraryDependencies ++= Seq(
-      "org.avaje.ebeanorm" % "avaje-ebeanorm" % "6.18.1",
+      "org.avaje.ebeanorm" % "avaje-ebeanorm" % "7.9.1",
       "org.scala-lang" % "scala-compiler" % "2.11.8"
     ),
     publishTo := {
@@ -27,7 +27,7 @@ lazy val ebean = (project in file(".")).
     pomIncludeRepository := { _ => false },
 
     pomExtra := {
-      <url>https://github.com/tarasbilinsky/scala-ebean</url>
+      <url>https://github.com/oltiv/scala-ebean</url>
         <licenses>
           <license>
             <name>Apache License, Version 2.0</name>
@@ -36,14 +36,14 @@ lazy val ebean = (project in file(".")).
           </license>
         </licenses>
         <scm>
-          <url>git@github.com:tarasbilinsky/scala-ebean.git</url>
-          <connection>scm:git@github.com:tarasbilinsky/scala-ebean.git</connection>
+          <url>git@github.com:oltiv/scala-ebean.git</url>
+          <connection>scm:git@github.com:oltiv/scala-ebean.git</connection>
         </scm>
         <developers>
           <developer>
-            <id>Taras</id>
-            <name>Taras Bilinsky</name>
-            <url>https://github.com/tarasbilinsky</url>
+            <id>oltiv</id>
+            <name>oltiv</name>
+            <url>https://github.com/oltiv</url>
           </developer>
         </developers>
     }
