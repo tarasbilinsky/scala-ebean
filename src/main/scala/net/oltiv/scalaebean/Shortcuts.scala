@@ -41,6 +41,7 @@ object Shortcuts {
     import cw.universe._
     val modelName: String
     val modelTypeSymbol: cw.Type
+    val autoAll: Boolean = true
 
 
     private val modelPropRE = s"\\Q$modelName.\\E([a-zA-Z0-9_\\.]*)".r
@@ -78,7 +79,7 @@ object Shortcuts {
         val r = s.substring(lengthOfModelNameWDot)
         if(r.startsWith("`") && r.endsWith("`")) r.substring(1,r.length-1) else r
         val r2 = if(r.startsWith("`") && r.endsWith("`")) r.substring(1,r.length-1) else r
-        val r3 = if(isModelProp(r2.split("\\."),modelTypeSymbol)) r2 + ".*" else r2
+        val r3 = if(autoAll && isModelProp(r2.split("\\."),modelTypeSymbol)) r2 + ".*" else r2
         r3
       }
       else exception(s"Select list must start with model name but got $s instead")
@@ -203,6 +204,7 @@ object Shortcuts {
       val cw: c.type = c
       val modelName = m.tree.toString
       val modelTypeSymbol: c.Type = m.actualType
+      override val autoAll: Boolean = false
     } with CommonMacroCode
 
     val selectAsStrings = select.map(w.processSelect)
