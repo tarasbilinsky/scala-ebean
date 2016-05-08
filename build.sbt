@@ -2,7 +2,7 @@ lazy val ebean = (project in file(".")).
   settings(
     organization := "net.oltiv",
     name := "scala-ebean-macros",
-    version := "0.1.2",
+    version := "0.1.4",
     scalaVersion := "2.11.8",
     scalacOptions += "-feature",
     libraryDependencies ++= Seq(

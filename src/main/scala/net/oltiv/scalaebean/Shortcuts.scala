@@ -9,6 +9,9 @@ import scala.reflect.macros._
 
 object Shortcuts {
 
+  private val EbeanPackage = "com.avaje.ebean"
+  private val EbeanModelClass = EbeanPackage+".Model"
+
   // not macro but has be be here as it result in ambiguous reference compiler error when placed into other object
   def query(sql: String): SqlQuery = Ebean.createSqlQuery(sql)
 
@@ -37,10 +40,11 @@ object Shortcuts {
     val cw: blackbox.Context
     import cw.universe._
     val modelName: String
+    val modelTypeSymbol: cw.Type
 
 
     private val modelPropRE = s"\\Q$modelName.\\E([a-zA-Z0-9_\\.]*)".r
-    private val modelPropWithImplicitRE = s"\\Qcom.intteh.scala.ebean.EbeanImplicits.\\E[a-zA-Z0-9_]*\\Q($modelName.\\E([a-zA-Z0-9_\\.]*)\\Q)\\E".r
+    private val modelPropWithImplicitRE = s"\\Qnet.oltiv.scalaebean.Shortcuts.\\E[a-zA-Z0-9_]*\\Q($modelName.\\E([a-zA-Z0-9_\\.]*)\\Q)\\E".r
 
     private val modelNameWDot = modelName + "."
     private val lengthOfModelNameWDot = modelNameWDot.length
@@ -53,13 +57,29 @@ object Shortcuts {
 
 
 
-    def exception(msg: String) = cw.abort(cw.enclosingPosition, "Shortcuts macro error. " + msg)
+    def exception(msg: String): Nothing = cw.abort(cw.enclosingPosition, "Shortcuts macro error. " + msg)
+
+    def isModelProp(s: Seq[String], typeSymbol: cw.Type):Boolean ={
+      if(s.isEmpty) false else {
+        val (head,tail) = (s.head,s.tail)
+        val nextClsOption: Option[cw.Symbol] = typeSymbol.members.find(_.name.toString==head)
+        val nextCls: cw.Type = if(nextClsOption.isDefined) nextClsOption.get.typeSignature else exception(s"$head field not found in ${typeSymbol.toString}")
+        if(nextCls.baseClasses.exists(_.fullName==EbeanModelClass) || nextCls.typeArgs.exists(ta=>ta.baseClasses.exists(_.fullName==EbeanModelClass))){
+          if(tail.isEmpty) true else isModelProp(tail,nextCls)
+        } else {
+          if(tail.isEmpty) false else exception(s"Incorrect property $s")
+        }
+      }
+    }
 
     def processSelect(t: cw.Expr[Any]) = {
       val s = t.tree.toString
       if (s.startsWith(modelNameWDot)){
         val r = s.substring(lengthOfModelNameWDot)
         if(r.startsWith("`") && r.endsWith("`")) r.substring(1,r.length-1) else r
+        val r2 = if(r.startsWith("`") && r.endsWith("`")) r.substring(1,r.length-1) else r
+        val r3 = if(isModelProp(r2.split("\\."),modelTypeSymbol)) r2 + ".*" else r2
+        r3
       }
       else exception(s"Select list must start with model name but got $s instead")
     }
@@ -182,6 +202,7 @@ object Shortcuts {
     val w = new {
       val cw: c.type = c
       val modelName = m.tree.toString
+      val modelTypeSymbol: c.Type = m.actualType
     } with CommonMacroCode
 
     val selectAsStrings = select.map(w.processSelect)
@@ -197,6 +218,7 @@ object Shortcuts {
     val w = new {
       val cw: c.type = c
       val modelName = m.tree.toString
+      val modelTypeSymbol: c.Type = m.actualType
     } with CommonMacroCode
 
     val qryResTree = w.makeQry(q.tree)
@@ -209,6 +231,7 @@ object Shortcuts {
     val w = new {
       val cw: c.type = c
       val modelName = m.tree.toString
+      val modelTypeSymbol: c.Type = m.actualType
     } with CommonMacroCode
     val sq = w.makeSelectAll
     val modelType = c.weakTypeOf[T]
@@ -222,6 +245,7 @@ object Shortcuts {
     val w = new {
       val cw: c.type = c
       val modelName = m.tree.toString
+      val modelTypeSymbol: c.Type = m.actualType
     } with CommonMacroCode
 
     val qryResTree = w.makeQry(q.tree)
@@ -236,6 +260,7 @@ object Shortcuts {
     val w = new {
       val cw: c.type = c
       val modelName = m.tree.toString
+      val modelTypeSymbol: c.Type = m.actualType
     } with CommonMacroCode
 
     val qryResTree = w.makeQry(q.tree)
@@ -254,7 +279,9 @@ object Shortcuts {
     val w = new {
       val cw: c.type = c
       val modelName = m.tree.toString
+      val modelTypeSymbol: c.Type = m.actualType
     } with CommonMacroCode
+
 
     val qryResTree = w.makeQry(q.tree)
 
@@ -273,6 +300,7 @@ object Shortcuts {
     val w = new {
       val cw: c.type = c
       val modelName = m.tree.toString
+      val modelTypeSymbol: c.Type = m.actualType
     } with CommonMacroCode
 
     val qryResTree = w.makeQry(q.tree)
