@@ -75,9 +75,9 @@ object Shortcuts {
 
     def processSelect(t: cw.Expr[Any]) = {
       val s = t.tree.toString
+      if(s==modelName) "*" else
       if (s.startsWith(modelNameWDot)){
         val r = s.substring(lengthOfModelNameWDot)
-        if(r.startsWith("`") && r.endsWith("`")) r.substring(1,r.length-1) else r
         val r2 = if(r.startsWith("`") && r.endsWith("`")) r.substring(1,r.length-1) else r
         val r3 = if(autoAll && isModelProp(r2.split("\\."),modelTypeSymbol)) r2 + ".*" else r2
         r3
