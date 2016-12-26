@@ -1,6 +1,20 @@
 # scala-ebean
 Helpers for using [Ebean ORM](http://ebean-orm.github.io) in Scala
 
+## Download
+ 
+ build.sbt:
+ ```
+ resolvers += "Maven Central" at "https://repo1.maven.org/maven2"
+ 
+ libraryDependencies += "com.github.tarasbilinsky" % "scala-ebean-macros" % "0.0.1"
+ ```
+ 
+ [Maven Central](http://search.maven.org/#artifactdetails%7Ccom.github.tarasbilinsky%7Cscala-ebean-macros%7C0.0.1%7Cjar)
+ 
+ [Jar](http://repo1.maven.org/maven2/com/github/tarasbilinsky/scala-ebean-macros/0.0.1/scala-ebean-macros-0.0.1.jar)
+ 
+ 
 ## Usage
 
 ```
