@@ -5,7 +5,15 @@ import java.text.SimpleDateFormat
 import com.avaje.ebean._
 
 import scala.language.experimental.macros
+import scala.reflect.ClassTag
 import scala.reflect.macros._
+
+class ModelField[+T <: Model](val name: String)(implicit tag: ClassTag[T])
+object ModelField{
+  def apply[T <: Model](cls: Class[T], p: String)(implicit tag: ClassTag[T]):Seq[ModelField[T]] = p.split(",").map(new ModelField[T](_))
+  def apply[T <: Model](m: T, select: Any*):Seq[ModelField[T]] = macro Shortcuts.modelFieldsMacroImpl[T]
+}
+
 
 object Shortcuts {
 
@@ -216,6 +224,7 @@ object Shortcuts {
     )
   }
 
+
   def exprMacroImpl(c: blackbox.Context)(m: c.Expr[Model], q: c.Expr[Boolean]): c.Expr[com.avaje.ebean.Expression] = {
     val w = new {
       val cw: c.type = c
@@ -240,6 +249,24 @@ object Shortcuts {
     import c.universe._
     c.Expr[com.avaje.ebean.Query[T]](
       q"com.avaje.ebean.Ebean.createQuery(classOf[$modelType]).select($sq)"
+    )
+  }
+
+  def modelFieldsMacroImpl[T<:Model : c.WeakTypeTag](c: blackbox.Context)(m: c.Expr[T], select: c.Expr[Any]*): c.Expr[Seq[ModelField[T]]] = {
+    val w = new {
+      val cw: c.type = c
+      val modelName = m.tree.toString
+      val modelTypeSymbol: c.Type = m.actualType
+      override val autoAll: Boolean = false
+    } with CommonMacroCode
+
+    val selectAsStrings = select.map(w.processSelect)
+    val res = selectAsStrings.mkString(",")
+    val modelType = c.weakTypeOf[T]
+
+    import c.universe._
+    c.Expr[Seq[ModelField[T]]](
+      q"ModelField.apply(classOf[$modelType],$res)"
     )
   }
 
@@ -401,6 +428,7 @@ object Shortcuts {
   //TODO helpers for easy date compare expressions
 
 
+  def query[T,T1](mClass: Class[T1], xClass: Class[T]): Query[T] = Ebean.createQuery(mClass).asInstanceOf[Query[T]]
 
   class EbeanImplicitQuery[T](val query: Query[T]){
     def seq()(implicit db: EbeanTransactionControl =  new EbeanTransactionControl()):Seq[T] = db.server.findList(query,db.transaction).asScala

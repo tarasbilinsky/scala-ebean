@@ -1,0 +1,6 @@
+To publish use SBT console
+
+1. publishLocal
+
+2. publishSigned
+passphrase 123456
