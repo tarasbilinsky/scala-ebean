@@ -2,7 +2,7 @@ package net.oltiv.scalaebean
 
 import java.text.SimpleDateFormat
 
-import com.avaje.ebean._
+import io.ebean._
 
 import scala.language.experimental.macros
 import scala.reflect.ClassTag
@@ -17,7 +17,7 @@ object ModelField{
 
 object Shortcuts {
 
-  private val EbeanPackage = "com.avaje.ebean"
+  private val EbeanPackage = "io.ebean"
   private val EbeanModelClass = EbeanPackage+".Model"
 
   // not macro but has be be here as it result in ambiguous reference compiler error when placed into other object
@@ -57,7 +57,7 @@ object Shortcuts {
 
     private val modelNameWDot = modelName + "."
     private val lengthOfModelNameWDot = modelNameWDot.length
-    private val e = q"com.avaje.ebean.Expr"
+    private val e = q"io.ebean.Expr"
 
     protected object NodeType extends Enumeration {
       type N = Value
@@ -225,7 +225,7 @@ object Shortcuts {
   }
 
 
-  def exprMacroImpl(c: blackbox.Context)(m: c.Expr[Model], q: c.Expr[Boolean]): c.Expr[com.avaje.ebean.Expression] = {
+  def exprMacroImpl(c: blackbox.Context)(m: c.Expr[Model], q: c.Expr[Boolean]): c.Expr[io.ebean.Expression] = {
     val w = new {
       val cw: c.type = c
       val modelName = m.tree.toString
@@ -233,7 +233,7 @@ object Shortcuts {
     } with CommonMacroCode
 
     val qryResTree = w.makeQry(q.tree)
-    c.Expr[com.avaje.ebean.Expression](
+    c.Expr[io.ebean.Expression](
       qryResTree
     )
   }
@@ -247,8 +247,8 @@ object Shortcuts {
     val sq = w.makeSelectAll
     val modelType = c.weakTypeOf[T]
     import c.universe._
-    c.Expr[com.avaje.ebean.Query[T]](
-      q"com.avaje.ebean.Ebean.createQuery(classOf[$modelType]).select($sq)"
+    c.Expr[io.ebean.Query[T]](
+      q"io.ebean.Ebean.createQuery(classOf[$modelType]).select($sq)"
     )
   }
 
@@ -280,8 +280,8 @@ object Shortcuts {
     val qryResTree = w.makeQry(q.tree)
     val sq = w.makeSelectAll
     import c.universe._
-    c.Expr[com.avaje.ebean.Query[T]](
-      q"com.avaje.ebean.Ebean.createQuery($mClass).select($sq).where($qryResTree)"
+    c.Expr[io.ebean.Query[T]](
+      q"io.ebean.Ebean.createQuery($mClass).select($sq).where($qryResTree)"
     )
   }
 
@@ -298,8 +298,8 @@ object Shortcuts {
 
     val modelType = c.weakTypeOf[T]
     import c.universe._
-    c.Expr[com.avaje.ebean.Query[T]](
-      q"com.avaje.ebean.Ebean.createQuery(classOf[$modelType]).select($sq).where($qryResTree)"
+    c.Expr[io.ebean.Query[T]](
+      q"io.ebean.Ebean.createQuery(classOf[$modelType]).select($sq).where($qryResTree)"
     )
   }
 
@@ -319,8 +319,8 @@ object Shortcuts {
 
     val modelType = c.weakTypeOf[T]
     import c.universe._
-    c.Expr[com.avaje.ebean.Query[T]](
-      q"{val q=com.avaje.ebean.Ebean.createQuery(classOf[$modelType]).select($sq);val q2=$fetch;q2.where($qryResTree)}"
+    c.Expr[io.ebean.Query[T]](
+      q"{val q=io.ebean.Ebean.createQuery(classOf[$modelType]).select($sq);val q2=$fetch;q2.where($qryResTree)}"
     )
   }
 
@@ -338,8 +338,8 @@ object Shortcuts {
     val (sq,fetch) = w.makeSelectAndFetch(selectAsStrings)
 
     import c.universe._
-    c.Expr[com.avaje.ebean.Query[T]](
-      q"{val q=com.avaje.ebean.Ebean.createQuery($mClass).select($sq);val q2=$fetch;q2.where($qryResTree)}"
+    c.Expr[io.ebean.Query[T]](
+      q"{val q=io.ebean.Ebean.createQuery($mClass).select($sq);val q2=$fetch;q2.where($qryResTree)}"
     )
   }
 
