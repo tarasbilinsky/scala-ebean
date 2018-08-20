@@ -10,7 +10,7 @@ import scala.reflect.macros._
 
 class ModelField[+T <: Model](val name: String)(implicit tag: ClassTag[T])
 object ModelField{
-  def apply[T <: Model](cls: Class[T], p: String)(implicit tag: ClassTag[T]):Seq[ModelField[T]] = p.split(",").map(new ModelField[T](_))
+  def apply[T <: Model](cls: Class[T], p: String)(implicit tag: ClassTag[T]):Seq[ModelField[T]] = p.split(",").toIndexedSeq.map(new ModelField[T](_))
   def apply[T <: Model](m: T, select: Any*):Seq[ModelField[T]] = macro Shortcuts.modelFieldsMacroImpl[T]
 }
 
@@ -87,7 +87,7 @@ object Shortcuts {
       if (s.startsWith(modelNameWDot)){
         val r = s.substring(lengthOfModelNameWDot)
         val r2 = if(r.startsWith("`") && r.endsWith("`")) r.substring(1,r.length-1) else r
-        val r3 = if(autoAll && isModelProp(r2.split("\\."),modelTypeSymbol)) r2 + ".*" else r2
+        val r3 = if(autoAll && isModelProp(r2.split("\\.").toIndexedSeq,modelTypeSymbol)) r2 + ".*" else r2
         r3
       }
       else exception(s"Select list must start with model name but got $s instead")
@@ -176,11 +176,11 @@ object Shortcuts {
 
       val fetchList3: Map[String, Seq[(String, String)]] = fetchList2.groupBy(_._1)
 
-      val fetchList4 = fetchList3.map { case (k, v) => (k, v.map(_._2)) }
+      val fetchList4: Map[String,Seq[String]] = fetchList3.map { case (k, v) => (k, v.map(_._2)) }
 
-      val fetchList5 = fetchList4.map { case (k, v) => (k, makeFieldsList(v)) }
+      val fetchList5: Map[String,String] = fetchList4.map { case (k, v) => (k, makeFieldsList(v)) }
 
-      val fetchListFinal = fetchList5.map { case (k, v) => (k, v) }(collection.breakOut)
+      val fetchListFinal:Seq[(String,String)] = fetchList5.toSeq
 
 
       val sl = if (selectOnlyNoFetches.isEmpty) "*" else makeFieldsList(selectOnlyNoFetches)
@@ -314,7 +314,7 @@ object Shortcuts {
 
     val qryResTree = w.makeQry(q.tree)
 
-    val selectAsStrings = select.map(w.processSelect)
+    val selectAsStrings: Seq[String] = select.map(w.processSelect).toSeq
     val (sq,fetch) = w.makeSelectAndFetch(selectAsStrings)
 
     val modelType = c.weakTypeOf[T]
@@ -334,7 +334,7 @@ object Shortcuts {
 
     val qryResTree = w.makeQry(q.tree)
 
-    val selectAsStrings = select.map(w.processSelect)
+    val selectAsStrings: Seq[String] = select.map(w.processSelect).toSeq
     val (sq,fetch) = w.makeSelectAndFetch(selectAsStrings)
 
     import c.universe._
@@ -388,10 +388,10 @@ object Shortcuts {
     }
     db.server.execute(cs, db.transaction)
 
-    paramsWithIndex.filter(_._1.isInstanceOf[Out]).map{
+    paramsWithIndex.collect{
       case (p:Out,i) => cs.getObject(i+1).asInstanceOf[T]
     }
-  }
+  }.toSeq
 
   def executeStoredProcedureReadOut[T](name: String,  outParam: Out, params: String*)(
     implicit db: EbeanTransactionControl = new EbeanTransactionControl): T =
@@ -431,13 +431,13 @@ object Shortcuts {
   def query[T,T1](mClass: Class[T1], xClass: Class[T]): Query[T] = Ebean.createQuery(mClass).asInstanceOf[Query[T]]
 
   class EbeanImplicitQuery[T](val query: Query[T]){
-    def seq()(implicit db: EbeanTransactionControl =  new EbeanTransactionControl()):Seq[T] = db.server.findList(query,db.transaction).asScala
-    def one()(implicit db: EbeanTransactionControl =  new EbeanTransactionControl()):Option[T] = Option(db.server.findOne(query.setMaxRows(1),db.transaction))
+    def seq()(implicit db: EbeanTransactionControl =  new EbeanTransactionControl()):Seq[T] = db.server.extended().findList(query,db.transaction).asScala.toSeq
+    def one()(implicit db: EbeanTransactionControl =  new EbeanTransactionControl()):Option[T] = Option(db.server.extended().findOne(query.setMaxRows(1),db.transaction))
   }
 
   class EbeanImplicitSqlQuery(val query: SqlQuery){
-    def seq()(implicit db: EbeanTransactionControl =  new EbeanTransactionControl()):Seq[SqlRow] = db.server.findList(query,db.transaction).asScala
-    def one()(implicit db: EbeanTransactionControl =  new EbeanTransactionControl()):Option[SqlRow] = Option(db.server.findOne(query.setMaxRows(1),db.transaction))
+    def seq()(implicit db: EbeanTransactionControl =  new EbeanTransactionControl()):Seq[SqlRow] = db.server.extended().findList(query,db.transaction).asScala.toSeq
+    def one()(implicit db: EbeanTransactionControl =  new EbeanTransactionControl()):Option[SqlRow] = Option(db.server.extended().findOne(query.setMaxRows(1),db.transaction))
   }
 
 

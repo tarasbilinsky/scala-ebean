@@ -2,13 +2,13 @@ lazy val ebean = (project in file(".")).
   settings(
     organization := "net.oltiv",
     name := "scala-ebean-macros",
-    version := "0.3.3",
-    scalaVersion := "2.12.4",
-    scalacOptions += "-feature",
+    version := "0.4.2",
+    scalaVersion := "2.13.0-M4",
+    scalacOptions ++= Seq("-feature","-deprecation"),
     libraryDependencies ++= Seq(
-      "io.ebean" % "ebean" % "11.14.3",
+      "io.ebean" % "ebean" % "11.22.1",
       //"io.ebean" % "ebean-agent" % "11.10.1",
-      "org.scala-lang" % "scala-compiler" % "2.12.4"
+      "org.scala-lang" % "scala-compiler" % "2.13.0-M4"
     ),
     publishTo := {
       val nexus = "https://oss.sonatype.org/"
